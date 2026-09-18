@@ -1,0 +1,1388 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>97 Workspace</title>
+    <!-- Moteur Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='8' fill='%23111'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='bold' fill='%23fff' text-anchor='middle'>97</text></svg>"
+    />
+    <style>
+      :root {
+        /* Palette minimaliste style IDE / Dashboard Pro */
+        --bg-main: #0e0e0e;
+        --bg-sidebar: #161616;
+        --bg-panel: #1c1c1c;
+        --border: #2a2a2a;
+        --border-focus: #404040;
+
+        --text-primary: #ededed;
+        --text-secondary: #a1a1aa;
+        --text-tertiary: #71717a;
+
+        --accent: #ffffff;
+        --accent-invert: #000000;
+        --danger: #ef4444;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        /* Polices natives pour un rendu "application" plus sérieux */
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        font-size: 14px;
+      }
+
+      /* --- Barre latérale --- */
+      aside {
+        width: 260px;
+        background: var(--bg-sidebar);
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border);
+        padding: 16px 12px;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px 12px 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border);
+        letter-spacing: -0.2px;
+      }
+
+      .brand span {
+        color: var(--text-tertiary);
+      }
+
+      .new-chat-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: var(--bg-panel);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .new-chat-btn:hover {
+        border-color: var(--border-focus);
+        background: #222;
+      }
+
+      .sidebar-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 8px 8px 0 8px;
+      }
+
+      .chat-list {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .chat-list::-webkit-scrollbar {
+        width: 4px;
+      }
+      .chat-list::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      .chat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--text-secondary);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .chat-item:hover {
+        background: var(--bg-panel);
+        color: var(--text-primary);
+      }
+
+      .chat-item.active {
+        background: var(--bg-panel);
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      .chat-item span.title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+
+      .chat-item button.del-btn {
+        background: none;
+        border: none;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        opacity: 0;
+        font-size: 12px;
+        padding: 2px 6px;
+      }
+
+      .chat-item:hover button.del-btn {
+        opacity: 1;
+      }
+      .chat-item button.del-btn:hover {
+        color: var(--danger);
+      }
+
+      .sidebar-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      .sidebar-footer a {
+        text-decoration: none;
+        font-size: 12px;
+        padding: 6px 8px;
+        border-radius: 4px;
+        color: var(--text-secondary);
+        transition: color 0.15s;
+      }
+
+      .sidebar-footer a:hover {
+        color: var(--text-primary);
+        background: var(--bg-panel);
+      }
+
+      /* --- Zone Principale --- */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: var(--bg-main);
+      }
+
+      .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .messages-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      .messages-container::-webkit-scrollbar-thumb {
+        background: var(--border);
+      }
+
+      /* Format pleine largeur type Slack/GitHub */
+      .message-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 24px 0;
+        border-bottom: 1px solid transparent;
+      }
+
+      .message-row.user {
+        background: var(--bg-sidebar);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .bubble {
+        max-width: 768px;
+        width: 100%;
+        padding: 0 24px;
+        font-size: 14.5px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      .message-row.assistant .bubble {
+        color: var(--text-primary);
+      }
+
+      .message-row.user .bubble {
+        color: var(--text-secondary);
+      }
+
+      .bubble pre {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 12px 0;
+      }
+
+      .bubble code {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
+        color: #e4e4e7;
+      }
+
+      .bubble p {
+        margin-bottom: 12px;
+      }
+      .bubble p:last-child {
+        margin-bottom: 0;
+      }
+      .bubble ul,
+      .bubble ol {
+        margin-left: 20px;
+        margin-bottom: 12px;
+      }
+      .bubble strong {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .thinking {
+        color: var(--text-tertiary);
+        font-style: italic;
+      }
+
+      /* --- Zone Input --- */
+      .input-wrapper {
+        padding: 20px;
+        background: var(--bg-main);
+        display: flex;
+        justify-content: center;
+      }
+
+      .input-bar {
+        width: 100%;
+        max-width: 768px;
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        transition: border-color 0.15s;
+      }
+
+      .input-bar:focus-within {
+        border-color: var(--border-focus);
+      }
+
+      textarea {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-size: 14.5px;
+        resize: none;
+        max-height: 200px;
+        line-height: 1.5;
+        padding: 6px 0;
+        font-family: inherit;
+      }
+
+      textarea::placeholder {
+        color: var(--text-tertiary);
+      }
+
+      .send-btn {
+        background: var(--accent);
+        color: var(--accent-invert);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        margin-bottom: 2px;
+        transition: opacity 0.15s;
+      }
+
+      .send-btn:hover:not(:disabled) {
+        opacity: 0.9;
+      }
+
+      .send-btn:disabled {
+        background: var(--border);
+        color: var(--text-tertiary);
+        cursor: not-allowed;
+      }
+
+      .send-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+      }
+
+      /* --- Modals --- */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        padding: 40px 10%;
+      }
+
+      .modal-card {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 24px;
+        height: 100%;
+        max-height: 800px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 16px;
+      }
+
+      .modal-header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .modal-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .account-select {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 13px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .account-select:focus {
+        border-color: var(--border-focus);
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        font-size: 18px;
+      }
+
+      .close-btn:hover {
+        color: var(--text-primary);
+      }
+
+      .mail-layout {
+        display: flex;
+        gap: 24px;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .mail-column-left {
+        width: 300px;
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-right: 16px;
+        overflow-y: auto;
+      }
+
+      .mail-card-item {
+        background: transparent;
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .mail-card-item:hover {
+        background: var(--bg-panel);
+      }
+
+      .mail-card-item.active {
+        background: var(--bg-sidebar);
+        border-color: var(--border-focus);
+      }
+
+      .mail-column-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        overflow-y: auto;
+      }
+
+      .mail-frame-container {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #ffffff;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #emailMetaHeader {
+        background: var(--bg-sidebar);
+        color: var(--text-secondary);
+        padding: 8px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #emailFrame {
+        width: 100%;
+        flex: 1;
+        border: none;
+        background: #ffffff;
+      }
+
+      .mail-controls {
+        display: flex;
+        gap: 12px;
+      }
+
+      .input-text {
+        flex: 1;
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none;
+      }
+
+      .input-text:focus {
+        border-color: var(--border-focus);
+      }
+
+      .editor-area {
+        flex: 1;
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 16px;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.6;
+        min-height: 120px;
+        white-space: pre-wrap;
+      }
+
+      .editor-area[contenteditable="true"]:focus {
+        outline: none;
+        border-color: var(--border-focus);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Barre latérale -->
+    <aside>
+      <div class="brand"><span>/</span> 97 Workspace</div>
+      <button class="new-chat-btn" onclick="startNewChat()">
+        Nouvelle discussion
+      </button>
+      <div class="sidebar-title">Historique</div>
+      <div class="chat-list" id="chatList"></div>
+
+      <div class="sidebar-title">Outils</div>
+      <button
+        class="new-chat-btn"
+        onclick="openMailModal()"
+        style="margin-top: 4px"
+      >
+        Gestion Emails
+      </button>
+      <button class="new-chat-btn" onclick="openCandModal()">
+        Suivi Candidatures
+      </button>
+
+      <div class="sidebar-footer">
+        <a href="/logout" class="logout-link">Déconnexion</a>
+        <a href="/mentions-legales" class="legal-link">Mentions Légales</a>
+      </div>
+    </aside>
+
+    <!-- Chat Principal -->
+    <main>
+      <div class="messages-container" id="messagesContainer"></div>
+
+      <div class="input-wrapper">
+        <form class="input-bar" id="chatForm">
+          <textarea
+            id="promptInput"
+            rows="1"
+            placeholder="Écrire un message..."
+            required
+          ></textarea>
+          <button type="submit" class="send-btn" id="sendBtn">
+            <svg viewBox="0 0 24 24">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Modal Boîte E-mails -->
+    <div id="mailModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-header-left">
+            <div class="modal-title">Boîte de réception</div>
+            <select
+              id="accountSelect"
+              class="account-select"
+              onchange="onAccountChange()"
+            ></select>
+          </div>
+          <button class="close-btn" onclick="closeMailModal()">✕</button>
+        </div>
+
+        <div class="mail-layout">
+          <div class="mail-column-left">
+            <button class="new-chat-btn" onclick="fetchEmails()">
+              Actualiser
+            </button>
+            <div
+              id="emailItems"
+              style="display: flex; flex-direction: column; gap: 6px"
+            ></div>
+          </div>
+
+          <div class="mail-column-right">
+            <div class="mail-frame-container">
+              <div id="emailMetaHeader">Sélectionnez un message...</div>
+              <iframe id="emailFrame"></iframe>
+            </div>
+
+            <div class="mail-controls">
+              <input
+                type="text"
+                id="aiInstruction"
+                class="input-text"
+                placeholder="Instructions pour la réponse (ex: refuser poliment)..."
+              />
+              <button class="new-chat-btn" onclick="processEmailWithAI()">
+                Générer
+              </button>
+            </div>
+
+            <div
+              id="aiEmailOutput"
+              class="editor-area"
+              contenteditable="true"
+              placeholder="La réponse apparaîtra ici..."
+            ></div>
+
+            <div style="display: flex; justify-content: flex-end">
+              <button
+                class="new-chat-btn"
+                onclick="sendFinalEmail()"
+                style="
+                  background: var(--text-primary);
+                  color: var(--bg-main);
+                  border: none;
+                "
+              >
+                Envoyer le message
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Suivi & Candidatures -->
+    <div id="candModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-header-left">
+            <div class="modal-title">Candidatures & Démarchage</div>
+            <div style="display: flex; gap: 8px">
+              <button class="new-chat-btn" onclick="switchCandTab('tracker')">
+                Tableau de Suivi
+              </button>
+              <button
+                class="new-chat-btn"
+                onclick="switchCandTab('new')"
+                style="border-color: var(--border-focus)"
+              >
+                Nouveau Démarchage
+              </button>
+            </div>
+          </div>
+          <button class="close-btn" onclick="closeCandModal()">✕</button>
+        </div>
+
+        <!-- VUE 1 : TABLEAU DE BORD SUIVI -->
+        <div
+          id="candTabTracker"
+          style="
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 13px;
+              color: var(--text-tertiary);
+            "
+          >
+            <span>
+              <span style="color: #4ade80">● Récent</span> &nbsp;|&nbsp;
+              <span style="color: #fde047">● Attente</span> &nbsp;|&nbsp;
+              <span style="color: #f87171">● À relancer</span>
+            </span>
+            <button
+              class="new-chat-btn"
+              onclick="loadCandTracker()"
+              style="padding: 6px 12px; font-size: 12px"
+            >
+              Actualiser
+            </button>
+          </div>
+
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 13.5px;
+              text-align: left;
+            "
+          >
+            <thead>
+              <tr
+                style="
+                  border-bottom: 1px solid var(--border);
+                  color: var(--text-tertiary);
+                "
+              >
+                <th style="padding: 10px">Entreprise</th>
+                <th style="padding: 10px">Email</th>
+                <th style="padding: 10px">Date d'envoi</th>
+                <th style="padding: 10px">Statut</th>
+                <th style="padding: 10px; text-align: right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="candTableBody">
+              <!-- Rempli par JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- VUE 2 : CRÉATION ET ENVOI -->
+        <div
+          id="candTabNew"
+          style="
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            padding-right: 4px;
+          "
+        >
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+            <input
+              type="text"
+              id="newCandEntreprise"
+              class="input-text"
+              placeholder="Entreprise (ex: La Plateforme du Bâtiment)"
+              required
+            />
+            <input
+              type="text"
+              id="newCandContact"
+              class="input-text"
+              placeholder="Nom/Poste contact (ex: Mme Fatima-Zahra FANHARRA)"
+            />
+            <input
+              type="text"
+              id="newCandUrl"
+              class="input-text"
+              placeholder="Site web (ex: https://laplateforme.com)"
+            />
+            <input
+              type="email"
+              id="newCandEmail"
+              class="input-text"
+              placeholder="E-mail direct (ex: rh@entreprise.fr)"
+            />
+          </div>
+
+          <button
+            class="new-chat-btn"
+            onclick="generateCandMail()"
+            style="justify-content: center"
+          >
+            ✨ Rédiger le mail & la lettre de motivation
+          </button>
+
+          <div
+            id="newCandLoader"
+            style="display: none; text-align: center"
+            class="thinking"
+          >
+            Extraction des informations du site et rédaction par Qwen 2.5...
+          </div>
+
+          <div
+            id="newCandPreview"
+            style="display: none; flex-direction: column; gap: 12px"
+          >
+            <div
+              style="
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 4px;
+                color: var(--text-primary);
+                font-weight: 600;
+              "
+            >
+              1. Courriel d'accompagnement
+            </div>
+            <input
+              type="text"
+              id="newCandSujet"
+              class="input-text"
+              placeholder="Objet de l'e-mail"
+            />
+            <textarea
+              id="newCandCorps"
+              class="input-text"
+              rows="4"
+              style="resize: vertical"
+              placeholder="Corps du courriel..."
+            ></textarea>
+
+            <div
+              style="
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 4px;
+                color: var(--text-primary);
+                font-weight: 600;
+                margin-top: 6px;
+              "
+            >
+              2. Lettre de motivation (sera générée au format PDF officiel)
+            </div>
+            <textarea
+              id="newCandP1"
+              class="input-text"
+              rows="3"
+              style="resize: vertical"
+              placeholder="Paragraphe 1 : L'entreprise, son actualité, ses projets..."
+            ></textarea>
+            <textarea
+              id="newCandP2"
+              class="input-text"
+              rows="4"
+              style="resize: vertical"
+              placeholder="Paragraphe 2 : Tes compétences techniques..."
+            ></textarea>
+            <textarea
+              id="newCandP3"
+              class="input-text"
+              rows="3"
+              style="resize: vertical"
+              placeholder="Paragraphe 3 : Pourquoi vous rejoindre..."
+            ></textarea>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 8px;
+              "
+            >
+              <span
+                id="newCandCvStatus"
+                style="font-size: 12px; color: var(--text-tertiary)"
+              ></span>
+              <button
+                class="new-chat-btn"
+                onclick="sendNewCandMail()"
+                style="
+                  background: var(--text-primary);
+                  color: var(--bg-main);
+                  border: none;
+                "
+              >
+                Générer le PDF & Envoyer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentConvId = null;
+      let currentSelectedEmail = null;
+      let currentAccount = "pro";
+
+      const messagesContainer = document.getElementById("messagesContainer");
+      const promptInput = document.getElementById("promptInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const chatList = document.getElementById("chatList");
+      const accountSelect = document.getElementById("accountSelect");
+
+      function escapeHtml(text) {
+        if (!text) return "";
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      promptInput.addEventListener("input", () => {
+        promptInput.style.height = "auto";
+        promptInput.style.height = promptInput.scrollHeight + "px";
+      });
+
+      promptInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          document
+            .getElementById("chatForm")
+            .dispatchEvent(new Event("submit"));
+        }
+      });
+
+      /* --- CHAT --- */
+      async function fetchConversations() {
+        const res = await fetch("/api/conversations");
+        const data = await res.json();
+        chatList.innerHTML = "";
+
+        data.forEach((conv) => {
+          const item = document.createElement("div");
+          item.className = `chat-item ${conv.id === currentConvId ? "active" : ""}`;
+          item.onclick = () => selectConversation(conv.id);
+
+          const title = document.createElement("span");
+          title.className = "title";
+          title.textContent = conv.title;
+
+          const del = document.createElement("button");
+          del.className = "del-btn";
+          del.innerHTML = "✕";
+          del.onclick = (e) => {
+            e.stopPropagation();
+            deleteConv(conv.id);
+          };
+
+          item.appendChild(title);
+          item.appendChild(del);
+          chatList.appendChild(item);
+        });
+
+        if (!currentConvId && data.length > 0) {
+          selectConversation(data[0].id);
+        } else if (!currentConvId) {
+          startNewChat();
+        }
+      }
+
+      async function startNewChat() {
+        const res = await fetch("/api/conversations", { method: "POST" });
+        const data = await res.json();
+        currentConvId = data.id;
+        await fetchConversations();
+        messagesContainer.innerHTML = "";
+      }
+
+      async function selectConversation(id) {
+        currentConvId = id;
+        document
+          .querySelectorAll(".chat-item")
+          .forEach((el) => el.classList.remove("active"));
+        fetchConversations();
+
+        const res = await fetch(`/api/conversations/${id}/messages`);
+        const msgs = await res.json();
+        messagesContainer.innerHTML = "";
+
+        msgs.forEach((m) => appendMessage(m.role, m.content));
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      async function deleteConv(id) {
+        await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+        if (currentConvId === id) currentConvId = null;
+        fetchConversations();
+      }
+
+      function appendMessage(role, text) {
+        const row = document.createElement("div");
+        row.className = `message-row ${role}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        if (role === "assistant") {
+          bubble.innerHTML = marked.parse(text);
+        } else {
+          bubble.textContent = text;
+        }
+
+        row.appendChild(bubble);
+        messagesContainer.appendChild(row);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        return bubble;
+      }
+
+      document
+        .getElementById("chatForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const text = promptInput.value.trim();
+          if (!text || !currentConvId) return;
+
+          appendMessage("user", text);
+          promptInput.value = "";
+          promptInput.style.height = "auto";
+          promptInput.disabled = true;
+          sendBtn.disabled = true;
+
+          const assistantBubble = appendMessage(
+            "assistant",
+            '<span class="thinking">Traitement...</span>',
+          );
+
+          try {
+            const res = await fetch("/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                conversation_id: currentConvId,
+                message: text,
+              }),
+            });
+            const data = await res.json();
+            assistantBubble.innerHTML = marked.parse(data.reply || data.error);
+            fetchConversations();
+          } catch (err) {
+            assistantBubble.textContent = "Erreur de connexion au serveur.";
+          } finally {
+            promptInput.disabled = false;
+            sendBtn.disabled = false;
+            promptInput.focus();
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+
+      /* --- EMAILS --- */
+      async function loadAccounts() {
+        try {
+          const res = await fetch("/api/email-accounts");
+          const accounts = await res.json();
+          accountSelect.innerHTML = "";
+
+          accounts.forEach((acc) => {
+            const opt = document.createElement("option");
+            opt.value = acc.key;
+            opt.textContent = `${acc.label} (${acc.email})`;
+            accountSelect.appendChild(opt);
+          });
+
+          if (accounts.length > 0) {
+            currentAccount = accounts[0].key;
+          }
+        } catch (err) {}
+      }
+
+      function onAccountChange() {
+        currentAccount = accountSelect.value;
+        currentSelectedEmail = null;
+        document.getElementById("emailMetaHeader").textContent =
+          "Sélectionnez un message...";
+        document.getElementById("emailFrame").srcdoc = "";
+        document.getElementById("aiEmailOutput").innerText = "";
+        fetchEmails();
+      }
+
+      async function openMailModal() {
+        document.getElementById("mailModal").style.display = "block";
+        await loadAccounts();
+        fetchEmails();
+      }
+
+      function closeMailModal() {
+        document.getElementById("mailModal").style.display = "none";
+      }
+
+      async function fetchEmails() {
+        const listDiv = document.getElementById("emailItems");
+        listDiv.innerHTML =
+          '<span style="color:var(--text-tertiary); font-size:13px;">Chargement...</span>';
+
+        try {
+          const res = await fetch(
+            `/api/emails?account=${encodeURIComponent(currentAccount)}`,
+          );
+          const emails = await res.json();
+          listDiv.innerHTML = "";
+
+          if (!emails || emails.length === 0) {
+            listDiv.innerHTML =
+              '<span style="color:var(--text-tertiary); font-size:13px;">Boîte vide.</span>';
+            return;
+          }
+
+          emails.forEach((mail) => {
+            const item = document.createElement("div");
+            item.className = "mail-card-item";
+            item.innerHTML = `
+              <strong style="color:var(--text-primary); font-size:13px;">${escapeHtml(mail.from.split("<")[0])}</strong>
+              <span style="color:var(--text-secondary); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(mail.subject || "(Sans objet)")}</span>
+            `;
+
+            item.onclick = () => {
+              document
+                .querySelectorAll(".mail-card-item")
+                .forEach((el) => el.classList.remove("active"));
+              item.classList.add("active");
+              currentSelectedEmail = mail;
+
+              document.getElementById("emailMetaHeader").innerHTML = `
+                <div style="margin-bottom: 4px;"><strong style="color:var(--text-primary);">De :</strong> ${escapeHtml(mail.from)}</div>
+                <div><strong style="color:var(--text-primary);">Objet :</strong> ${escapeHtml(mail.subject)}</div>
+              `;
+
+              const iframe = document.getElementById("emailFrame");
+              iframe.srcdoc =
+                mail.html_body ||
+                `<body style="font-family:sans-serif; padding:16px; color:#111; font-size: 14px;">${escapeHtml(mail.body)}</body>`;
+            };
+
+            listDiv.appendChild(item);
+          });
+        } catch (err) {
+          listDiv.innerHTML =
+            '<span style="color:var(--danger); font-size:13px;">Erreur IMAP.</span>';
+        }
+      }
+
+      async function processEmailWithAI() {
+        if (!currentSelectedEmail)
+          return alert("Sélectionnez d'abord un e-mail.");
+
+        const instruction = document.getElementById("aiInstruction").value;
+        const output = document.getElementById("aiEmailOutput");
+        output.innerHTML =
+          '<span class="thinking">Génération du brouillon...</span>';
+
+        try {
+          const res = await fetch("/api/emails/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              account: currentAccount,
+              from: currentSelectedEmail.from,
+              subject: currentSelectedEmail.subject,
+              body: currentSelectedEmail.body,
+              instruction: instruction,
+            }),
+          });
+          const data = await res.json();
+          output.innerHTML = marked.parse(data.analysis || data.error);
+        } catch (err) {
+          output.textContent = "Erreur de traitement.";
+        }
+      }
+
+      async function sendFinalEmail() {
+        if (!currentSelectedEmail) return alert("Aucun e-mail sélectionné.");
+
+        const output = document.getElementById("aiEmailOutput");
+        let bodyText = output.innerText.trim();
+
+        if (bodyText.includes("Proposition de réponse")) {
+          bodyText = bodyText.split("Proposition de réponse").pop().trim();
+        } else if (bodyText.includes("Ma Réponse")) {
+          bodyText = bodyText.split("Ma Réponse").pop().trim();
+        }
+
+        if (!bodyText) return alert("Le corps du message est vide.");
+        if (!confirm(`Envoyer ce message avec le compte ${currentAccount} ?`))
+          return;
+
+        try {
+          const res = await fetch("/api/emails/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              account: currentAccount,
+              to: currentSelectedEmail.from,
+              subject: "Re: " + (currentSelectedEmail.subject || ""),
+              body: bodyText,
+            }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert("Envoyé.");
+            closeMailModal();
+          } else {
+            alert("Erreur : " + data.error);
+          }
+        } catch (err) {
+          alert("Erreur serveur.");
+        }
+      }
+
+      /* --- CANDIDATURES --- */
+      function openCandModal() {
+        document.getElementById("candModal").style.display = "block";
+        switchCandTab("tracker");
+        loadCandTracker();
+      }
+
+      function closeCandModal() {
+        document.getElementById("candModal").style.display = "none";
+      }
+
+      function switchCandTab(tab) {
+        document.getElementById("candTabTracker").style.display =
+          tab === "tracker" ? "flex" : "none";
+        document.getElementById("candTabNew").style.display =
+          tab === "new" ? "flex" : "none";
+      }
+
+      async function loadCandTracker() {
+        const tbody = document.getElementById("candTableBody");
+        tbody.innerHTML =
+          '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-tertiary);">Chargement du suivi...</td></tr>';
+
+        try {
+          const res = await fetch("/api/candidatures/list");
+          const items = await res.json();
+          tbody.innerHTML = "";
+
+          if (items.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-tertiary);">Aucune candidature enregistrée pour le moment.</td></tr>';
+            return;
+          }
+
+          items.forEach((c) => {
+            let badgeHtml = "";
+            const jours = c.jours_ecoules || 0;
+
+            if (c.statut === "repondu") {
+              badgeHtml =
+                '<span style="background:rgba(192,132,252,0.1); color:#c084fc; border:1px solid rgba(192,132,252,0.2); padding:3px 8px; border-radius:6px; font-size:12px; font-weight:500;">Répondu</span>';
+            } else if (jours < 4) {
+              badgeHtml = `<span style="background:rgba(74,222,128,0.1); color:#4ade80; border:1px solid rgba(74,222,128,0.2); padding:3px 8px; border-radius:6px; font-size:12px; font-weight:500;">${jours}j (Récent)</span>`;
+            } else if (jours <= 7) {
+              badgeHtml = `<span style="background:rgba(253,224,71,0.1); color:#fde047; border:1px solid rgba(253,224,71,0.2); padding:3px 8px; border-radius:6px; font-size:12px; font-weight:500;">${jours}j (Attente)</span>`;
+            } else {
+              badgeHtml = `<span style="background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.2); padding:3px 8px; border-radius:6px; font-size:12px; font-weight:500;">${jours}j (Relancer)</span>`;
+            }
+
+            const tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid var(--border)";
+            tr.innerHTML = `
+              <td style="padding:10px; color:var(--text-primary);"><strong>${escapeHtml(c.entreprise)}</strong></td>
+              <td style="padding:10px; color:var(--text-secondary);">${escapeHtml(c.email_contact)}</td>
+              <td style="padding:10px; color:var(--text-tertiary);">${c.date_envoi.split(" ")[0]}</td>
+              <td style="padding:10px;">${badgeHtml}</td>
+              <td style="padding:10px; text-align:right;">
+                ${c.statut !== "repondu" ? `<button onclick="markCandAnswered(${c.id})" style="background:none; border:1px solid var(--border); color:var(--text-secondary); border-radius:4px; padding:3px 8px; cursor:pointer; font-size:12px; margin-right:6px;">Marquer répondu</button>` : ""}
+                <button onclick="deleteCand(${c.id})" style="background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:14px;">✕</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } catch (err) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--danger);">Erreur lors du chargement des données.</td></tr>';
+        }
+      }
+
+      async function markCandAnswered(id) {
+        await fetch(`/api/candidatures/${id}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ statut: "repondu" }),
+        });
+        loadCandTracker();
+      }
+
+      async function deleteCand(id) {
+        if (!confirm("Supprimer cette candidature de l'historique ?")) return;
+        await fetch(`/api/candidatures/${id}`, { method: "DELETE" });
+        loadCandTracker();
+      }
+
+      async function generateCandMail() {
+        const entreprise = document
+          .getElementById("newCandEntreprise")
+          .value.trim();
+        const contact = document.getElementById("newCandContact").value.trim();
+        const url = document.getElementById("newCandUrl").value.trim();
+        const email = document.getElementById("newCandEmail").value.trim();
+
+        if (!entreprise)
+          return alert("Indique au moins le nom de l'entreprise.");
+
+        const loader = document.getElementById("newCandLoader");
+        const preview = document.getElementById("newCandPreview");
+        loader.style.display = "block";
+        preview.style.display = "none";
+
+        try {
+          const res = await fetch("/api/candidatures/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ entreprise, contact, url, email }),
+          });
+          const data = await res.json();
+          if (data.error) return alert(data.error);
+
+          if (data.email)
+            document.getElementById("newCandEmail").value = data.email;
+          document.getElementById("newCandSujet").value = data.sujet_mail;
+          document.getElementById("newCandCorps").value = data.corps_mail;
+          document.getElementById("newCandP1").value = data.lettre_p1;
+          document.getElementById("newCandP2").value = data.lettre_p2;
+          document.getElementById("newCandP3").value = data.lettre_p3;
+          document.getElementById("newCandCvStatus").textContent = data.cv_found
+            ? "📎 CV (cv.pdf) + Lettre PDF joints"
+            : "⚠️ Attention : cv.pdf introuvable à la racine";
+
+          preview.style.display = "flex";
+        } catch (e) {
+          alert("Erreur lors de la génération.");
+        } finally {
+          loader.style.display = "none";
+        }
+      }
+
+      async function sendNewCandMail() {
+        const entreprise = document
+          .getElementById("newCandEntreprise")
+          .value.trim();
+        const contact = document.getElementById("newCandContact").value.trim();
+        const url = document.getElementById("newCandUrl").value.trim();
+        const email = document.getElementById("newCandEmail").value.trim();
+        const sujet_mail = document.getElementById("newCandSujet").value.trim();
+        const corps_mail = document.getElementById("newCandCorps").value.trim();
+        const lettre_p1 = document.getElementById("newCandP1").value.trim();
+        const lettre_p2 = document.getElementById("newCandP2").value.trim();
+        const lettre_p3 = document.getElementById("newCandP3").value.trim();
+
+        if (!email) return alert("E-mail de contact obligatoire.");
+        if (
+          !confirm(
+            `Générer la lettre PDF et envoyer la candidature à ${email} ?`,
+          )
+        )
+          return;
+
+        const res = await fetch("/api/candidatures/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            entreprise,
+            contact,
+            url,
+            email,
+            sujet_mail,
+            corps_mail,
+            lettre_p1,
+            lettre_p2,
+            lettre_p3,
+          }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert(
+            "Candidature et lettre de motivation PDF envoyées avec succès !",
+          );
+          document.getElementById("newCandPreview").style.display = "none";
+          document.getElementById("newCandEntreprise").value = "";
+          document.getElementById("newCandContact").value = "";
+          document.getElementById("newCandUrl").value = "";
+          document.getElementById("newCandEmail").value = "";
+          switchCandTab("tracker");
+          loadCandTracker();
+        } else {
+          alert("Erreur : " + data.error);
+        }
+      }
+
+      fetchConversations();
+    </script>
+  </body>
+</html>

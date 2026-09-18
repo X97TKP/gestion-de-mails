@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion - 97 Espace de travail</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='8' fill='%23111'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='bold' fill='%23fff' text-anchor='middle'>97</text></svg>"
+    />
+    <style>
+      :root {
+        /* Palette minimaliste et fonctionnelle */
+        --bg-main: #0e0e0e;
+        --bg-card: #161616;
+        --border: #2a2a2a;
+        --border-focus: #404040;
+
+        --text-primary: #ededed;
+        --text-secondary: #a1a1aa;
+        --text-tertiary: #71717a;
+
+        --accent: #ffffff;
+        --accent-invert: #000000;
+
+        --danger: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.1);
+        --danger-border: rgba(239, 68, 68, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        /* Polices natives du système */
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-size: 14px;
+      }
+
+      .login-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px; /* Finis les énormes arrondis à 24px */
+        padding: 32px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .login-header {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+
+      .brand {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        letter-spacing: -0.3px;
+      }
+
+      .brand span {
+        color: var(--text-tertiary);
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      label {
+        font-size: 13px;
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      input[type="password"] {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px 12px;
+        color: var(--text-primary);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.15s;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      input[type="password"]:focus {
+        border-color: var(--border-focus);
+      }
+
+      input[type="password"]::placeholder {
+        color: var(--text-tertiary);
+      }
+
+      button.submit-btn {
+        background: var(--accent);
+        color: var(--accent-invert);
+        border: none;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.15s;
+        margin-top: 8px;
+      }
+
+      button.submit-btn:hover {
+        opacity: 0.9;
+      }
+
+      .error-msg {
+        background: var(--danger-bg);
+        border: 1px solid var(--danger-border);
+        color: var(--danger);
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        text-align: center;
+        font-weight: 500;
+      }
+
+      .login-footer {
+        text-align: center;
+        margin-top: 8px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+
+      .legal-link {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+
+      .legal-link:hover {
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand"><span>/</span> 97 Workspace</div>
+        <div class="subtitle">Accès sécurisé (IA & Mails)</div>
+      </div>
+
+      {% if error %}
+      <div class="error-msg">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="/login">
+        <div class="input-group">
+          <label for="password">Mot de passe administrateur</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••••••"
+            required
+            autofocus
+          />
+        </div>
+        <button type="submit" class="submit-btn">Se connecter</button>
+      </form>
+
+      <div class="login-footer">
+        <a href="/mentions-legales" class="legal-link"
+          >Mentions Légales & RGPD</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

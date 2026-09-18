@@ -1,0 +1,8 @@
+.env
+/templates/mentions_legales.html
+generated_letters
+candidatures.db
+chat.db
+run_workspaces.vbs
+cv.pdf
+__pycache__
